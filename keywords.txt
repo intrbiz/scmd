@@ -1,0 +1,44 @@
+#######################################
+# Syntax Coloring Map for library ChainedRFID
+#######################################
+
+#######################################
+# KEYWORD1 Classes, datatypes, and C++ keywords
+#######################################
+
+SCMD  KEYWORD1
+
+ 
+#######################################
+# KEYWORD2 Methods and functions
+#######################################
+
+writeAck        KEYWORD2
+writeCommand    KEYWORD2
+writeHeader     KEYWORD2
+writeDataChunk  KEYWORD2
+readAck         KEYWORD2
+readCommand     KEYWORD2
+readHeader      KEYWORD2
+readDataChunk   KEYWORD2
+computeCRC      KEYWORD2
+
+#######################################
+# KEYWORD3 setup and loop functions, as well as the Serial keywords
+#######################################
+
+loop          KEYWORD3
+setOnReceive  KEYWORD3
+
+#######################################
+LITERAL1 Constants
+#######################################
+
+STATUS_OK        LITERAL1
+STATUS_BADLEN    LITERAL1
+STATUS_BADMAGIC  LITERAL1
+STATUS_BADVER    LITERAL1
+STATUS_BADCRC    LITERAL1
+STATUS_BADBUF    LITERAL1
+STATUS_BADACK    LITERAL1
+

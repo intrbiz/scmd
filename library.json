@@ -1,0 +1,13 @@
+{
+  "name": "SCMD",
+  "keywords": "Serial",
+  "description": "A simple Serial command protocol for chip to chip communications over RS232",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/intrbiz/scmd.git"
+  },
+  "exclude": "doc",
+  "frameworks": "arduino",
+  "platforms": ["*"]
+}
