@@ -1,5 +1,5 @@
 #######################################
-# Syntax Coloring Map for library ChainedRFID
+# Syntax Coloring Map for library SCMD
 #######################################
 
 #######################################
