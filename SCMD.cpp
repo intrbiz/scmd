@@ -4,9 +4,24 @@
 
 #include <SCMD.h>
 
+void SCMD::initMaster()
+{
+    initDevice(SCMD_MASTER_ID);
+}
+
+void SCMD::initDevice(byte deviceId)
+{
+    _deviceId = deviceId & 0xF;
+}
+
 SCMD::SCMD_STATUS SCMD::writeCommand(byte command, byte* payload, uint16_t len)
 {
-  SCMD_STATUS hs = writeHeader(command, len);
+    return writeCommand(command, SCMD_MASTER_ID, payload, len);
+}
+
+SCMD::SCMD_STATUS SCMD::writeCommand(byte command, byte target, byte* payload, uint16_t len)
+{
+  SCMD_STATUS hs = writeHeader(command, target, len);
   if (hs != STATUS_OK) return hs;
   for (uint16_t i = 0; i < len; i += 32)
   {
@@ -16,7 +31,7 @@ SCMD::SCMD_STATUS SCMD::writeCommand(byte command, byte* payload, uint16_t len)
   return STATUS_OK;
 }
 
-SCMD::SCMD_STATUS SCMD::writeHeader(byte command, uint16_t len)
+SCMD::SCMD_STATUS SCMD::writeHeader(byte command, byte target, uint16_t len)
 {
   // build the 8 byte header
   byte header[8];
@@ -24,7 +39,7 @@ SCMD::SCMD_STATUS SCMD::writeHeader(byte command, uint16_t len)
   header[1] = SCMD_MAGIC_2;
   header[2] = SCMD_VERSION;
   header[3] = command;
-  header[4] = 0;
+  header[4] = (_deviceId << 4) | (target & 0xF); // target and from addresses (4 bits each)
   header[5] = (byte) ((len >> 8) & 0xFF);
   header[6] = (byte) (len & 0xFF);
   header[7] = 0;
@@ -71,7 +86,7 @@ SCMD::SCMD_STATUS SCMD::readAck()
   return STATUS_BADACK;
 }
 
-SCMD::SCMD_STATUS SCMD::readCommand(byte *command, uint16_t *payloadLength, byte *payload, uint16_t maxPayloadLen)
+SCMD::SCMD_STATUS SCMD::readCommand(byte *command, byte *from, uint16_t *payloadLength, byte *payload, uint16_t maxPayloadLen)
 {
   // read the header
   byte header[8];
@@ -79,6 +94,8 @@ SCMD::SCMD_STATUS SCMD::readCommand(byte *command, uint16_t *payloadLength, byte
   if (stat != STATUS_OK) return stat;
   // the command
   command[0] = header[3];
+  // the target
+  from[0] = (header[4] >> 4) & 0xF;
   // the length
   payloadLength[0] = (((uint16_t) header[5]) << 8) | ((uint16_t) header[6]);
   if (maxPayloadLen < payloadLength[0]) return STATUS_BADBUF;
@@ -108,9 +125,17 @@ SCMD::SCMD_STATUS SCMD::readHeader(byte *header)
   // is the crc valid ?
   if (gotCRC == theCRC)
   {
-    // ack
-    writeAck();
-    return STATUS_OK;
+    // is this message for us
+    if ((header[4] & 0xF) == _deviceId)
+    {
+      // ack
+      writeAck();
+      return STATUS_OK;
+    }
+    else
+    {
+      return STATUS_NOTUS;
+    }
   }
   else
   {
@@ -158,7 +183,7 @@ byte SCMD::computeCRC(const byte *data, byte len)
   return crc;
 }
 
-void SCMD::setOnReceive(void (*callback)(byte, byte*, uint16_t))
+void SCMD::setOnReceive(void (*callback)(byte, byte, byte*, uint16_t))
 {
     this->callback = callback;
 }
@@ -169,12 +194,13 @@ void SCMD::loop()
     {
         // read the command
         byte cmd;
+        byte frm;
         uint16_t len;
-        SCMD_STATUS stat = readCommand(&cmd, &len, buffer, sizeof(buffer));
+        SCMD_STATUS stat = readCommand(&cmd, &frm, &len, buffer, sizeof(buffer));
         if (stat == STATUS_OK && callback != NULL)
         {
             // invoke the callback
-            callback(cmd, buffer, len);
+            callback(cmd, frm, buffer, len);
         }
     }        
 }
