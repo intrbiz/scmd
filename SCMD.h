@@ -46,7 +46,7 @@ class SCMD
             STATUS_BADACK   = 0x06,
             STATUS_NOTUS    = 0x07
         };
-        SCMD(Stream& stream) : _stream(stream) { _debug = false; callback = NULL;}
+        SCMD(Stream& stream, byte *_buffer, uint16_t _bufferLen) : _stream(stream) { _debug = false; callback = NULL; buffer = _buffer; bufferLen = _bufferLen; }
         void initMaster();
         void initDevice(byte deviceId);
         SCMD_STATUS writeAck();
@@ -67,7 +67,8 @@ class SCMD
         Stream *_debugTo;
         bool _debug;
         void (*callback)(byte, byte, byte*, uint16_t);
-        byte buffer[MAX_COMMAND_PAYLOAD_LENGTH];
+        byte *buffer;
+        uint16_t bufferLen;
         byte _deviceId;
 };
 

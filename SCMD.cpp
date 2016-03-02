@@ -192,15 +192,22 @@ void SCMD::loop()
 {
     if (_stream.available())
     {
+        if (_debug) _debugTo->println("Read");
         // read the command
         byte cmd;
         byte frm;
         uint16_t len;
-        SCMD_STATUS stat = readCommand(&cmd, &frm, &len, buffer, sizeof(buffer));
+        SCMD_STATUS stat = readCommand(&cmd, &frm, &len, buffer, bufferLen);
         if (stat == STATUS_OK && callback != NULL)
         {
+            if (_debug) _debugTo->println("OK");
             // invoke the callback
             callback(cmd, frm, buffer, len);
+        }
+        else
+        {
+            if (_debug) _debugTo->print("Bad");
+            if (_debug) _debugTo->println(stat, HEX);
         }
     }        
 }
