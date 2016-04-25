@@ -14,6 +14,16 @@ void SCMD::initDevice(byte deviceId)
     _deviceId = deviceId & 0xF;
 }
 
+SCMD::SCMD_STATUS SCMD::writeCommand(SCMDMessage& message)
+{
+    return writeCommand(message.command(), SCMD_MASTER_ID, message.payload(), message.length());
+}
+
+SCMD::SCMD_STATUS SCMD::writeCommand(byte target, SCMDMessage& message)
+{
+    return writeCommand(message.command(), target, message.payload(), message.length());
+}
+
 SCMD::SCMD_STATUS SCMD::writeCommand(byte command, byte* payload, uint16_t len)
 {
     return writeCommand(command, SCMD_MASTER_ID, payload, len);

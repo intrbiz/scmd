@@ -33,6 +33,18 @@
 
 #define SCMD_MASTER_ID    0x00
 
+class SCMDMessage
+{
+    public:
+        SCMDMessage(byte* payload, uint16_t plen) { _payload = payload; memset(_payload, 0, plen); }
+        SCMDMessage(byte* payload) { _payload = payload; }
+        virtual uint16_t length();
+        virtual byte command();
+        byte* payload() { return _payload; }
+    protected:
+        byte* _payload;
+};
+
 class SCMD
 {
     public:
@@ -50,6 +62,8 @@ class SCMD
         void initMaster();
         void initDevice(byte deviceId);
         SCMD_STATUS writeAck();
+        SCMD_STATUS writeCommand(SCMDMessage& message);
+        SCMD_STATUS writeCommand(byte target, SCMDMessage& message);
         SCMD_STATUS writeCommand(byte command, byte* payload, uint16_t len);
         SCMD_STATUS writeCommand(byte command, byte target, byte* payload, uint16_t len);
         SCMD_STATUS writeHeader(byte command, byte target, uint16_t len);
